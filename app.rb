@@ -50,6 +50,10 @@ class NewsDynamo < Sinatra::Base
       request_path[1] == path
     end
 
+    def tutorial_new(req)    
+    tutorial = Tutorial.new
+    tutorial.number = req['number'].to_json
+    tutorial
   end #helpers
 
   get '/' do
@@ -97,9 +101,8 @@ class NewsDynamo < Sinatra::Base
       halt 400
     end
 
-    tutorial = Tutorial.new
-    tutorial.number = req['number'].to_json
-
+    tutorial = tutorial_new(req)
+    
     if tutorial.save
       status 201
       redirect "/api/v1/tutorials/#{tutorial.id}"
