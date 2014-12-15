@@ -1,9 +1,8 @@
 require 'aws-sdk'
 
 class Tutorial < AWS::Record::HashModel
-  string_attr :description
-  string_attr :usernames
-  string_attr :badges
+
+  string_attr :number
   timestamps
 
   def self.destroy(id)
