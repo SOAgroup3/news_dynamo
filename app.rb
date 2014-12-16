@@ -20,7 +20,8 @@ class NewsDynamo < Sinatra::Base
         if /^\d+$/.match(number)         
           newsfound.first(number.to_i)
         
-        else raise "ouch"
+        else 
+          raise "ouch"
         end                
       rescue
         halt 404
@@ -34,7 +35,8 @@ class NewsDynamo < Sinatra::Base
         newsfound.each do |i|          
           if i.has_key?(col_name[0])
             news_return.push(col_name=> i[col_name[0]])
-          else raise "ouch col"
+          else 
+            raise "ouch col"
           end
         end
         news_return
@@ -123,5 +125,4 @@ class NewsDynamo < Sinatra::Base
     
     get_news(number[0].to_s).to_json
   end
-
 end
