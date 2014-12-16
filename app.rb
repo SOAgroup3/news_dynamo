@@ -13,7 +13,7 @@ class NewsDynamo < Sinatra::Base
     set :session_secret, "something"    # ignore if not using shotgun in development
   end
 
-  	helpers do
+	helpers do
     def get_news(number)
       begin
         newsfound = Thenewslensapi::NewsLens.gets_news
@@ -51,9 +51,10 @@ class NewsDynamo < Sinatra::Base
     end
 
     def tutorial_new(req)    
-    tutorial = Tutorial.new
-    tutorial.number = req['number'].to_json
-    tutorial
+      tutorial = Tutorial.new
+      tutorial.number = req['number'].to_json
+      tutorial
+    end
   end #helpers
 
   get '/' do
@@ -110,7 +111,7 @@ class NewsDynamo < Sinatra::Base
   end
 
   get '/api/v1/tutorials/:id' do
-    content_type :json
+    content_type :json, charset: 'utf-8'
     logger.info "GET /api/v1/tutorials/#{params[:id]}"
     begin
       @tutorial = Tutorial.find(params[:id])
