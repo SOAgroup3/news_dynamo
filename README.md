@@ -5,7 +5,7 @@ Authors : LinAnita, peyruchao(peggy) and ethancychen
 
 ## Heroku web service
 
-> https://thenewslensapp2.herokuapp.com
+> https://newsdynamo.herokuapp.com
 
 ### Introduction: Read the hot news from The News Lens ( http://www.thenewslens.com )
 
@@ -15,17 +15,28 @@ Authors : LinAnita, peyruchao(peggy) and ethancychen
 ###Usage
 
 - GET   /
-   returns the home page of our service.
+   returns everything is ok at api/v1.
 
-- GET   /news
-   returns a page could let users to input how many news that want to read.
+- GET   /api/v1/?
+   returns everything is ok.
 
-- GET   /news/:number   
-   returns JSON of <number> of the least news include : title, author, dates.
+- GET   /api/v1/:number.json   
+   returns JSON of <number> of the least news include : title, author, dates and summary.
+   or  returns 404 for user not found
 
-- GET   /tutorials
+- GET   /api/v1/tutorials/:id
+   takes: id # (1,2,3, etc.) of query
    returns an advanced function to catch the data from database.
+    or  returns 404 for user not found
 
 - POST  /api/v1/specify.json
    takes JSON: array of column header
    returns: array of news titles on NewLens 
+   or  returns 404 for user not found
+
+- POST /api/v1/tutorials
+  record tutorial request to DB
+  or  returns 404 for user not found
+
+- DELETE /api/v1/tutorials/:id
+  takes: id # (1,2,3, etc.) of query
