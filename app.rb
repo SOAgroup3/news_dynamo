@@ -1,7 +1,8 @@
 require 'sinatra/base'
 require 'thenewslensapi'
 require 'json'
-require_relative 'model/tutorial'
+require_relative 'model/classification'
+require_relative 'model/keyword'
 
 class NewsDynamo < Sinatra::Base
 
@@ -17,12 +18,29 @@ class NewsDynamo < Sinatra::Base
     def get_news(number)
       begin
         newsfound = Thenewslensapi::NewsLens.gets_news
-        if /^\d+$/.match(number)         
+        if /^\d+$/.match(number)
           newsfound.first(number.to_i)
-        
-        else 
+        else
           raise "ouch"
-        end                
+        end
+      rescue
+        halt 404
+      end
+    end
+
+    def get_news_keyword(word)
+      begin
+        newsfound = Thenewslensapi::NewsLens.gets_news
+        newsfound.select { |item| item["title"] =~ /#{word}/ }
+      rescue
+        halt 404
+      end
+    end
+
+    def get_news_author(words)
+      begin
+        newsfound = Thenewslensapi::NewsLens.gets_news
+        newsfound.select { |item| item["author"] =~ /#{words}/ }
       rescue
         halt 404
       end
@@ -32,10 +50,10 @@ class NewsDynamo < Sinatra::Base
       begin
         newsfound = Thenewslensapi::NewsLens.gets_news
         news_return=Array.new
-        newsfound.each do |i|          
+        newsfound.each do |i|
           if i.has_key?(col_name[0])
             news_return.push(col_name=> i[col_name[0]])
-          else 
+          else
             raise "ouch col"
           end
         end
@@ -52,25 +70,67 @@ class NewsDynamo < Sinatra::Base
       request_path[1] == path
     end
 
-    def tutorial_new(req)    
-      tutorial = Tutorial.new
-      tutorial.number = req['number'].to_json
-      tutorial
+    def classification_new(req)
+      classification = Classification.new
+      classification.number = req['number'].to_json
+      classification
     end
+
+    def keyword_new(key)
+      keyword = Keyword.new
+      keyword.word = key['word'].to_json
+      keyword
+    end
+
   end #helpers
 
   get '/' do
-    'hehehehe~~~~ Thenewslens Dynamo is up and working at api/v1'
+    'hehehehe~~~~ Thenewslens service is up and working at api/v1'
   end
 
   get '/api/v1/?' do
-    "Thenewslens Dynamo /api/v1 is up and working"
+    "Thenewslens service /api/v1 is up and working, you can search the number of news or keywords"
   end
 
   get '/api/v1/:number.json' do
     content_type :json, 'charset' => 'utf-8'
     begin
       get_news(params[:number]).to_json
+    rescue
+      halt 404
+    end
+  end
+
+  post '/api/v1/keywords' do
+    content_type :json, 'charset' => 'utf-8'
+    begin
+      key = JSON.parse(request.body.read)
+      logger.info key
+    rescue Exception => e
+      puts e.message
+      halt 400
+    end
+
+    keyword = keyword_new(key)
+
+    if keyword.save
+      redirect "/api/v1/keywords/#{keyword.id}"
+    end
+  end
+
+  get '/api/v1/keywords/:word.json' do
+    content_type :json, 'charset' => 'utf-8'
+    begin
+      get_news_keyword(params[:word]).to_json
+    rescue
+      halt 404
+    end  
+  end
+
+  get '/api/v1/originalnews' do
+    content_type :json, 'charset' => 'utf-8'
+    begin
+      get_news_author('TNL').to_json
     rescue
       halt 404
     end
@@ -91,11 +151,11 @@ class NewsDynamo < Sinatra::Base
     end
   end
 
-  delete '/api/v1/tutorials/:id' do
-    tutorial = Tutorial.destroy(params[:id])
+  delete '/api/v1/class/:id' do
+    classification = Classification.destroy(params[:id])
   end
 
-  post '/api/v1/tutorials' do
+  post '/api/v1/class' do
     content_type :json
     begin
       req = JSON.parse(request.body.read)
@@ -104,25 +164,25 @@ class NewsDynamo < Sinatra::Base
       halt 400
     end
 
-    tutorial = tutorial_new(req)
-    
-    if tutorial.save
+    classification = classification_new(req)
+
+    if classification.save
       status 201
-      redirect "/api/v1/tutorials/#{tutorial.id}"
+      redirect "/api/v1/class/#{classification.id}"
     end
   end
 
-  get '/api/v1/tutorials/:id' do
+  get '/api/v1/class/:id' do
     content_type :json, charset: 'utf-8'
-    logger.info "GET /api/v1/tutorials/#{params[:id]}"
+    logger.info "GET /api/v1/class/#{params[:id]}"
     begin
-      @tutorial = Tutorial.find(params[:id])
-      number = JSON.parse(@tutorial.number)
+      @classification = Classification.find(params[:id])
+      number = JSON.parse(@classification.number)
       logger.info({ number: number }.to_json)
     rescue
       halt 400
     end
-    
     get_news(number[0].to_s).to_json
   end
+
 end

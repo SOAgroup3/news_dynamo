@@ -1,6 +1,6 @@
 require 'aws-sdk'
 
-class Tutorial < AWS::Record::HashModel
+class Classification < AWS::Record::HashModel
 
   string_attr :number
   timestamps
