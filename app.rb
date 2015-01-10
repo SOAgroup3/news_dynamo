@@ -124,6 +124,15 @@ class NewsDynamo < Sinatra::Base
     end
   end
 
+  get '/api/v1/originals' do
+    content_type :json, 'charset' => 'utf-8'
+     begin
+      get_news_author('TNL').to_json
+    rescue
+      halt 404
+    end
+  end
+
   post '/api/v1/specify.json' do
     #in tux ,type:
     #  post '/api/v1/specify.json' , "{\"col_name\": [\"title\"]}"
