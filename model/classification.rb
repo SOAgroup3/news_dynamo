@@ -3,6 +3,7 @@ require 'aws-sdk'
 class Classification < AWS::Record::HashModel
 
   string_attr :number
+  string_attr :column
   timestamps
 
   def self.destroy(id)

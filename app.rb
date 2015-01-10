@@ -3,6 +3,7 @@ require 'thenewslensapi'
 require 'json'
 require_relative 'model/classification'
 require_relative 'model/keyword'
+require_relative 'model/original'
 
 class NewsDynamo < Sinatra::Base
 
@@ -73,13 +74,8 @@ class NewsDynamo < Sinatra::Base
     def classification_new(req)
       classification = Classification.new
       classification.number = req['number'].to_json
+      classification.column = req['column'].to_json
       classification
-    end
-
-    def keyword_new(key)
-      keyword = Keyword.new
-      keyword.word = key['word'].to_json
-      keyword
     end
 
   end #helpers
@@ -101,36 +97,28 @@ class NewsDynamo < Sinatra::Base
     end
   end
 
-  post '/api/v1/keywords' do
-    content_type :json, 'charset' => 'utf-8'
+  get '/api/v1/keywords/:word.json' do
+    content_type :json, charset: 'utf-8'
     begin
-      key = JSON.parse(request.body.read)
-      logger.info key
-    rescue Exception => e
-      puts e.message
+      result= get_news_keyword(params[:word]).to_json
+      keyword = Keyword.new
+      keyword.word = params[:word]
+      keyword.result = result
+      logger.info "Save result: #{result}" if keyword.save
+      result
+    rescue
       halt 400
     end
-
-    keyword = keyword_new(key)
-
-    if keyword.save
-      redirect "/api/v1/keywords/#{keyword.id}"
-    end
-  end
-
-  get '/api/v1/keywords/:word.json' do
-    content_type :json, 'charset' => 'utf-8'
-    begin
-      get_news_keyword(params[:word]).to_json
-    rescue
-      halt 404
-    end  
   end
 
   get '/api/v1/originalnews' do
     content_type :json, 'charset' => 'utf-8'
     begin
-      get_news_author('TNL').to_json
+      result = get_news_author('TNL').to_json
+      original = Original.new
+      original.result = result
+      logger.info "Save result: #{result}" if original.save
+      result
     rescue
       halt 404
     end
