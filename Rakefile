@@ -1,6 +1,7 @@
 require 'rake/testtask'
 require './app'
-require_relative 'model/tutorial.rb'
+require_relative 'model/classification.rb'
+require_relative 'model/keyword.rb'
 
 task :default => :spec
 
@@ -13,7 +14,8 @@ namespace :db do
   desc "Create database"
   task :migrate do
     begin
-      Tutorial.create_table(5, 6)
+      Classification.create_table(5, 6)
+      Keyword.create_table(5, 6)
     rescue AWS::DynamoDB::Errors::ResourceInUseException => e
       puts 'DB exists -- no changes made, no retry attempted'
     end
