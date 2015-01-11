@@ -1,6 +1,7 @@
 require 'sinatra/base'
 require 'thenewslensapi'
 require 'json'
+
 require_relative 'model/classification'
 require_relative 'model/keyword'
 require_relative 'model/original'
@@ -85,7 +86,7 @@ class NewsDynamo < Sinatra::Base
   end
 
   get '/api/v1/?' do
-    "Thenewslens service /api/v1 is up and working, you can search the number of news or keywords"
+    "Thenewslens service /api/v1 is up and working, you can search the number of news or more functions."
   end
 
   get '/api/v1/:number.json' do
@@ -111,6 +112,24 @@ class NewsDynamo < Sinatra::Base
     end
   end
 
+  get '/api/v1/newest_original' do
+    content_type :json, charset: 'utf-8'
+    begin
+      #dynamoDB will add item from top, find the first one is the latest data.
+      original = Original.find(:first)
+      logger.info "result: #{original.result}\n"
+      original.result
+      #final = Hash.new(0)
+      #Original.find(:all).each do |original|
+      #final = original.result
+      #logger.info "result: #{original.result}\n"
+      #end
+      #final
+    rescue
+      halt 400
+    end
+  end
+
   get '/api/v1/originalnews' do
     content_type :json, 'charset' => 'utf-8'
     begin
@@ -123,20 +142,19 @@ class NewsDynamo < Sinatra::Base
       halt 404
     end
   end
-
-  get '/api/v1/originals' do
-    content_type :json, 'charset' => 'utf-8'
-     begin
-      get_news_author('TNL').to_json
-    rescue
-      halt 404
-    end
-  end
+ 
+  #get '/api/v1/originals' do
+    #content_type :json, 'charset' => 'utf-8'
+     #begin
+      #get_news_author('TNL').to_json
+    #rescue
+      #halt 404
+    #end
+  #end
 
   post '/api/v1/specify.json' do
     #in tux ,type:
     #  post '/api/v1/specify.json' , "{\"col_name\": [\"title\"]}"
-    #
     content_type :json, 'charset' => 'utf-8'
     begin
       #get all post parameter
